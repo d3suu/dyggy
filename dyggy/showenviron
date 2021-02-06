@@ -1,0 +1,7 @@
+#!/usr/bin/python3
+# vim: set filetype=python
+
+import os
+print("200 OK\nContent-Type: text\n\n")
+#print(os.environ['QUERY_STRING']) # for get
+print(os.environ)

@@ -1,0 +1,69 @@
+#!/usr/bin/python3
+# vim: set filetype=python
+
+import os
+import sys
+import pymysql
+import hashlib
+import random
+
+userinput = sys.stdin.read()
+try:
+	usernick = userinput.split('&')[0].split('=')[1]
+	userpass = userinput.split('&')[1].split('=')[1]
+except:
+	print("200 OK\nContent-Type: text\n\nNope.")
+	exit()
+
+if(usernick == ""):
+	print("200 OK\nContent-Type: text\n\nUser nick cant be empty.")
+	exit()
+
+if(userpass == ""):
+	print("200 OK\nContent-Type: text\n\nUser password cant be empty.")
+	exit()
+
+m = hashlib.sha256()
+
+database = "dyggy"
+host = "localhost"
+user = "dyggy"
+password = ""
+conn = pymysql.connect(host=host, user=user, password=password, database=database)
+
+cur = conn.cursor()
+query = f"SELECT active FROM users WHERE nick='{usernick}'"
+cur.execute(query)
+active = cur.fetchone()
+if(active == None):
+	print("200 OK\nContent-Type: text\n\nUser does not exist.")
+	exit()
+
+if(active[0] != 1):
+	print("200 OK\nContent-Type: text\n\nUser must be active.")
+	exit()
+
+query = f"SELECT password, salt FROM users WHERE nick='{usernick}'"
+conn.commit()
+cur.execute(query)
+password, salt = cur.fetchone()
+conn.commit()
+
+m.update((userpass + salt).encode())
+if(password == m.hexdigest()):
+	m = hashlib.md5((salt + str(random.randint(0,99999999))).encode())
+	cookie = m.hexdigest()
+	query = f"UPDATE users SET cookie='{cookie}' WHERE nick='{usernick}'"
+	cur = conn.cursor()
+	cur.execute(query)
+	conn.commit()
+	print("301 Moved Permanently")
+	print("Location: /main")
+	print(f"Set-Cookie: dyggycookie={cookie}")
+
+print("200 OK\nContent-Type: text\n\nWrong password.")
+
+
+#print("200 OK\nContent-Type: text\n\n")
+#print(sys.stdin.read())
+#print(os.environ)

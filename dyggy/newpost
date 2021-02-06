@@ -1,0 +1,68 @@
+#!/usr/bin/python3
+#-*- coding: utf-8 -*-
+# vim: set filetype=python
+
+import os
+import sys
+import pymysql
+import hashlib
+import random
+import html
+import urllib.parse
+
+postval=os.environ['QUERY_STRING'].split('=')[1]
+postval=postval.replace('+', ' ')
+postval=html.unescape(postval)
+postval=urllib.parse.unquote(postval)
+postval=postval.replace('<', ' ').replace('>', ' ')
+
+if("'" in postval):
+	print("200 OK\nContent-Type: text\n\nNo 's no mkay.")
+	exit()
+
+if(postval == ""):
+	print("200 OK\nContent-Type: text\n\nPost cant be empty.")
+	exit()
+
+if(len(postval)>500):
+	print("200 OK\nContent-Type: text\n\nPost too long! (Over 500 chars.)")
+	exit()
+
+database = "dyggy"
+host = "localhost"
+user = "dyggy"
+password = ""
+conn = pymysql.connect(host=host, user=user, password=password, database=database)
+
+cookie = os.environ['HTTP_COOKIE'].split('=')[1]
+query = f"SELECT nick, active FROM users WHERE cookie='{cookie}';"
+cur = conn.cursor()
+cur.execute(query)
+conn.commit()
+usernick = cur.fetchone()
+if(usernick == None):
+	print("200 OK\n\nCookie/nick error")
+	exit()
+
+active = usernick[1]
+usernick = usernick[0]
+
+if(str(active) == str(0)):
+	print("200 OK\nContent-Type: text\n\nAccount not active")
+	exit()
+
+query = f"INSERT INTO posts (nick, value, isreply, replies, hearts) VALUES ('{usernick}', '{postval}', '0', '0', '0');"
+cur = conn.cursor()
+cur.execute(query)
+conn.commit()
+
+#print("301 Moved Permanently")
+#print("Location: /main")
+print("301 Moved Permanently")
+print("Location: /main")
+print("200 OK\nContent-Type: text\n\nDEBUG LOL")
+#print("200 OK\n\nB")
+
+#print("200 OK\nContent-Type: text\n\n")
+#print(sys.stdin.read())
+#print(os.environ)

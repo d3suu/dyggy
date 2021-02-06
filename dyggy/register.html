@@ -1,0 +1,8 @@
+#!/usr/bin/python3
+# vim: set filetype=python
+
+import os
+print("200 OK\nContent-Type: text/html\n\n")
+path = '/var/www/dyggy/template/register.html'
+template = open(path, 'r')
+print(template.read())
