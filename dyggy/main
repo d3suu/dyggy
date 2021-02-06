@@ -1,0 +1,34 @@
+#!/usr/bin/python3
+# vim: set filetype=python
+
+import os
+import pymysql
+print("200 OK\nContent-Type: text/html\n\n")
+path = '/var/www/dyggy/template/main.html'
+template = open(path, 'r')
+templatehtml = template.read() #.format('test')
+
+# Check cookie
+conn = pymysql.connect(host='localhost', user='dyggy', password='', database='dyggy')
+cur = conn.cursor()
+cookie = os.environ['HTTP_COOKIE'].split('=')[1]
+query = f"SELECT nick FROM users WHERE cookie='{cookie}'"
+cur.execute(query)
+conn.commit()
+#print(cookie)
+usernick = cur.fetchone()
+if(usernick == None):
+	print("Nope.")
+	exit()
+
+query = f"SELECT * FROM posts WHERE isreply=0 ORDER BY id DESC LIMIT 100;"
+cur.execute(query)
+conn.commit()
+posts = cur.fetchall()
+#print(str(posts[0]))
+postshtml=""
+for row in posts:
+	#print(str(row) + "<br>")
+	postshtml+= "<b>" + str(row[1]) + " - <a href='/post?p=" + str(row[0]) + "'>" + str(row[3].strftime("%d/%m/%Y - %H:%M:%S")) + " (Show Comments)</a></b><p>" + str(row[2]) + "</p><sub><a href='/post?p=" + str(row[0]) + "'>replies: "+str(row[6])+"</a> hearts: "+str(row[7])+"</sub><hr>\n"
+
+print(templatehtml.format(usernick[0], postshtml))
