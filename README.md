@@ -5,6 +5,9 @@ Weekend project: Python3+MariaDB+fcgiwrap social network
 
 Idea was to create single social network in one weekend, to learn or remind SQL, MariaDB, nginx, CGI and Python3. Code is far from being perfect, almost no comments, I'm pretty much sure it's unsafe in some places, absolutely no dynamic parsers for input, but it works, and was able to handle group of friends without any problems!
 
+## Dyggy domain
+I registered dyggy.ml on freenom, however I canceled my subscription. Feel free to use it as You want.
+
 ## Self-hosting
 Check "build log.md" for my steps of server setup. Everything in "dyggy" directory should be in `/var/www/dyggy`. Change domain name in nginx config. Make sure everything has executable flag (except templates).
 
